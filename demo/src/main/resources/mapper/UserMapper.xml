@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//maybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.UserMapper">
+
+    <select id="selectByUsername" resultType="com.example.demo.pojo.User">
+        SELECT * FROM users
+        WHERE username = #{username}
+    </select>
+    <select id="selectByUsernameAndRole" resultType="com.example.demo.pojo.User">
+        SELECT * FROM users
+        WHERE username = #{username} AND role = #{role}
+    </select>
+    <select id="selectByIds" resultType="com.example.demo.pojo.User">
+        SELECT * FROM users
+        WHERE id = #{id}
+    </select>
+    <select id="selectByEmail" resultType="com.example.demo.pojo.User">
+        SELECT * FROM users
+        WHERE email = #{email}
+    </select>
+    <select id="selectAllUsers" resultType="com.example.demo.pojo.User">
+        SELECT * FROM users ORDER BY created_at DESC
+    </select>
+    <insert id="insertUser" parameterType="com.example.demo.pojo.User">
+        INSERT INTO users (username, password_hash, email, role)
+        VALUES (#{username}, #{passwordHash}, #{email}, #{role, jdbcType=VARCHAR})
+    </insert>
+    <update id="updateUser" parameterType="com.example.demo.pojo.User">
+        UPDATE users
+        <set>
+            <if test="username != null">username = #{username},</if>
+            <if test="passwordHash != null">password_hash = #{passwordHash},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="role != null">role = #{role},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+    <update id="forgetUser" parameterType="com.example.demo.pojo.User">
+        UPDATE users
+        SET password_hash = #{passwordHash}
+        WHERE email = #{email}
+    </update>
+    <delete id="deleteUser" parameterType="int">
+        DELETE FROM users
+        WHERE id = #{id}
+    </delete>
+</mapper>

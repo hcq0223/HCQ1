@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//maybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.CertificationMapper">
+    <insert id="insertCertification" parameterType="com.example.demo.pojo.Certification" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO certifications (resume_id, name, issuing_organization, issue_date, expiry_date,
+        credential_id, credential_url, sort_order)
+        VALUES (#{resumeId}, #{name}, #{issuingOrganization}, #{issueDate}, #{expiryDate},
+        #{credentialId}, #{credentialUrl}, #{sortOrder})
+    </insert>
+    <delete id="deleteById">
+        DELETE FROM certifications WHERE id = #{id} AND resume_id = #{resumeId}
+    </delete>
+    <delete id="deleteCertificationBatch">
+        DELETE FROM certifications
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+        AND resume_id = #{resumeId}
+        AND resume_id IN (
+        SELECT r.id FROM resumes r WHERE r.id = #{resumeId} AND r.user_id = #{userId} AND r.is_deleted = 0
+        )
+    </delete>
+    <update id="updateCertification" parameterType="com.example.demo.pojo.Certification">
+        UPDATE certifications
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="issuingOrganization != null">issuing_organization = #{issuingOrganization},</if>
+            <if test="issueDate != null">issue_date = #{issueDate},</if>
+            <if test="expiryDate != null">expiry_date = #{expiryDate},</if>
+            <if test="credentialId != null">credential_id = #{credentialId},</if>
+            <if test="credentialUrl != null">credential_url = #{credentialUrl},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+        </set>
+        WHERE id = #{id} AND resume_id = #{resumeId}
+    </update>
+    <select id="selectById" resultType="com.example.demo.pojo.Certification">
+        SELECT id, resume_id, name, issuing_organization, issue_date, expiry_date,
+        credential_id, credential_url, sort_order, created_at
+        FROM certifications
+        WHERE id = #{id} AND resume_id = #{resumeId}
+    </select>
+    <select id="selectByResumeId" resultType="com.example.demo.pojo.Certification">
+        SELECT id, resume_id, name, issuing_organization, issue_date, expiry_date,
+        credential_id, credential_url, sort_order, created_at
+        FROM certifications
+        WHERE resume_id = #{resumeId}
+        ORDER BY sort_order ASC, created_at DESC
+    </select>
+    <select id="selectIdsByResumeId" resultType="int">
+        SELECT id FROM certifications WHERE resume_id = #{resumeId}
+    </select>
+    <update id="updateCertificationSortOrderBatch">
+        UPDATE certifications
+        SET sort_order = CASE id
+        <foreach collection="list" item="item">
+            WHEN #{item.id} THEN #{item.sortOrder}
+        </foreach>
+        END
+        WHERE id IN
+        <foreach collection="list" item="item" open="(" separator="," close=")">#{item.id}</foreach>
+        AND resume_id = #{resumeId}
+    </update>
+</mapper>

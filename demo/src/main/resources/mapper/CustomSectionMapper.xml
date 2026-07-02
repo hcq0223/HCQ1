@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//maybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.CustomSectionMapper">
+    <insert id="insertCustomSection" parameterType="com.example.demo.pojo.CustomSection" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO custom_sections (resume_id, section_title, content, sort_order)
+        VALUES (#{resumeId}, #{sectionTitle}, #{content}, #{sortOrder})
+    </insert>
+    <delete id="deleteById">
+        DELETE FROM custom_sections WHERE id = #{id} AND resume_id = #{resumeId}
+    </delete>
+    <delete id="deleteCustomSectionBatch">
+        DELETE FROM custom_sections
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+        AND resume_id = #{resumeId}
+        AND resume_id IN (
+        SELECT r.id FROM resumes r WHERE r.id = #{resumeId} AND r.user_id = #{userId} AND r.is_deleted = 0
+        )
+    </delete>
+    <update id="updateCustomSection" parameterType="com.example.demo.pojo.CustomSection">
+        UPDATE custom_sections
+        <set>
+            <if test="sectionTitle != null">section_title = #{sectionTitle},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id} AND resume_id = #{resumeId}
+    </update>
+    <select id="selectById" resultType="com.example.demo.pojo.CustomSection">
+        SELECT id, resume_id, section_title, content, sort_order, created_at, updated_at
+        FROM custom_sections
+        WHERE id = #{id} AND resume_id = #{resumeId}
+    </select>
+    <select id="selectByResumeId" resultType="com.example.demo.pojo.CustomSection">
+        SELECT id, resume_id, section_title, content, sort_order, created_at, updated_at
+        FROM custom_sections
+        WHERE resume_id = #{resumeId}
+        ORDER BY sort_order ASC, created_at DESC
+    </select>
+    <select id="selectIdsByResumeId" resultType="int">
+        SELECT id FROM custom_sections WHERE resume_id = #{resumeId}
+    </select>
+    <update id="updateCustomSectionSortOrderBatch">
+        UPDATE custom_sections
+        SET sort_order = CASE id
+        <foreach collection="list" item="item">
+            WHEN #{item.id} THEN #{item.sortOrder}
+        </foreach>
+        END,
+        updated_at = NOW()
+        WHERE id IN
+        <foreach collection="list" item="item" open="(" separator="," close=")">#{item.id}</foreach>
+        AND resume_id = #{resumeId}
+    </update>
+</mapper>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//maybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.ResumeMapper">
+    <select id="selectResumeById" resultType="com.example.demo.pojo.Resume">
+        SELECT * FROM resumes
+        WHERE id = #{id} AND is_deleted = FALSE
+    </select>
+    <select id="selectResumeByIdHf" resultType="com.example.demo.pojo.Resume">
+        SELECT * FROM resumes
+        WHERE id = #{id} AND is_deleted = TRUE
+    </select>
+    <select id="selectResumeByUserId" resultType="com.example.demo.pojo.Resume">
+        SELECT * FROM resumes
+        WHERE user_id = #{userId} AND is_deleted = FALSE
+    </select>
+    <select id="selectResumeByTemplateId" resultType="com.example.demo.pojo.Resume">
+        SELECT * FROM resumes
+        WHERE template_id = #{templateId} AND is_deleted = FALSE AND user_id = #{userId}
+    </select>
+    <select id="selectResumeByStatus" resultType="com.example.demo.pojo.Resume">
+        SELECT * FROM resumes
+        WHERE status = #{status} AND is_deleted = FALSE AND user_id = #{userId}
+    </select>
+    <select id="selectTrashResume" resultType="com.example.demo.pojo.Resume">
+        SELECT * FROM resumes
+        WHERE is_deleted = TRUE AND user_id = #{userId}
+    </select>
+    <select id="selectAllResumes" resultType="com.example.demo.pojo.Resume">
+        SELECT * FROM resumes ORDER BY created_at DESC
+    </select>
+    <insert id="insertResume" parameterType="com.example.demo.pojo.Resume">
+        INSERT INTO resumes (user_id, title, full_name, email, phone, location, linkedin_url, github_url, personal_website, avatar_url, professional_summary, template_id, status, is_deleted)
+        VALUES (#{userId}, #{title}, #{fullName}, #{email}, #{phone}, #{location}, #{linkedinUrl}, #{githubUrl}, #{personalWebsite}, #{avatarUrl}, #{professionalSummary}, #{templateId}, #{status}, #{isDeleted})
+    </insert>
+    <update id="updateResume" parameterType="com.example.demo.pojo.Resume">
+        UPDATE resumes
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="fullName != null">full_name = #{fullName},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="location != null">location = #{location},</if>
+            <if test="linkedinUrl != null">linkedin_url = #{linkedinUrl},</if>
+            <if test="githubUrl != null">github_url = #{githubUrl},</if>
+            <if test="personalWebsite != null">personal_website = #{personalWebsite},</if>
+            <if test="avatarUrl != null">avatar_url = #{avatarUrl},</if>
+            <if test="professionalSummary != null">professional_summary = #{professionalSummary},</if>
+            <if test="templateId != null">template_id = #{templateId},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id} AND user_id = #{userId}
+    </update>
+    <update id="isDeleteResume" parameterType="com.example.demo.pojo.Resume">
+        UPDATE resumes
+        SET is_deleted = TRUE
+        WHERE id = #{id} AND user_id = #{userId} AND is_deleted = FALSE
+    </update>
+    <update id="noIsDeleteResume" parameterType="com.example.demo.pojo.Resume">
+        UPDATE resumes
+        SET is_deleted = FALSE
+        WHERE id = #{id} AND user_id = #{userId} AND is_deleted = TRUE
+    </update>
+    <update id="updateStatusDraftResume" parameterType="com.example.demo.pojo.Resume">
+        UPDATE resumes
+        SET status = 'draft'
+        WHERE id = #{id} AND user_id = #{userId} AND status = 'published'
+    </update>
+    <update id="updateStatusPublishedResume" parameterType="com.example.demo.pojo.Resume">
+        UPDATE resumes
+        SET status = 'published'
+        WHERE id = #{id} AND user_id = #{userId} AND status = 'draft'
+    </update>
+    <delete id="deleteResume" parameterType="com.example.demo.pojo.Resume">
+        DELETE FROM resumes
+        WHERE id = #{id} AND user_id = #{userId} AND is_deleted = TRUE
+    </delete>
+</mapper>

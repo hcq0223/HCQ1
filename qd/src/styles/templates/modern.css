@@ -1,0 +1,8 @@
+.tpl-modern { background: #f8fafc; }
+.tpl-modern .preview-header { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 20px 24px; margin: 0 0 16px 0; border-left: 4px solid #0ea5e9; }
+.tpl-modern .preview-name-block h1 { color: #0f172a; font-size: 22px; }
+.tpl-modern .preview-section { background: #fff; border-radius: 8px; padding: 16px 20px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.tpl-modern .preview-section h2 { color: #0ea5e9; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; }
+.tpl-modern .item-header strong { color: #334155; }
+.tpl-modern .skill-tag { background: #f0f9ff; color: #0284c7; border: 1px solid #bae6fd; border-radius: 6px; }
+.tpl-modern .date { font-size: 11px; background: #f1f5f9; padding: 1px 8px; border-radius: 4px; }

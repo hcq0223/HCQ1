@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//maybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.WorkExperienceMapper">
+    <insert id="insert" parameterType="com.example.demo.pojo.WorkExperience">
+        INSERT INTO work_experiences (resume_id, company_name, position, location, start_date, end_date, description, achievements, sort_order)
+        VALUES (#{resumeId}, #{companyName}, #{position}, #{location}, #{startDate}, #{endDate}, #{description}, #{achievements}, #{sortOrder})
+    </insert>
+    <select id="selectByPrimaryId" resultType="com.example.demo.pojo.WorkExperience">
+        SELECT * FROM work_experiences
+        WHERE id = #{id} AND resume_id = #{resumeId}
+    </select>
+    <select id="selectByPrimaryResumeId" resultType="com.example.demo.pojo.WorkExperience">
+        SELECT * FROM work_experiences
+        WHERE resume_id = #{resumeId} ORDER BY sort_order
+    </select>
+    <update id="updateByPrimary" parameterType="com.example.demo.pojo.WorkExperience">
+        UPDATE work_experiences
+        <set>
+            <if test="companyName != null">company_name = #{companyName},</if>
+            <if test="position != null">position = #{position},</if>
+            <if test="location != null">location = #{location},</if>
+            <if test="startDate != null">start_date = #{startDate},</if>
+            <if test="endDate != null">end_date = #{endDate},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="achievements != null">achievements = #{achievements},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id} AND resume_id = #{resumeId}
+    </update>
+    <delete id="deleteByPrimary">
+        DELETE FROM work_experiences
+        WHERE id = #{id} AND resume_id = #{resumeId}
+    </delete>
+    <delete id="WorkExperienceDeleteBatch">
+        DELETE FROM work_experiences
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND resume_id = #{resumeId}
+        AND resume_id IN (
+        SELECT r.id FROM resumes r WHERE r.id = #{resumeId} AND r.user_id = #{userId} AND r.is_deleted = 0
+        )
+    </delete>
+    <update id="updateWorkExperienceSortOrderBatch">
+        UPDATE work_experiences
+        SET sort_order = CASE id
+        <foreach collection="list" item="item" index="index">
+            WHEN #{item.id} THEN #{item.sortOrder}
+        </foreach>
+        END
+        WHERE id IN
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item.id}
+        </foreach>
+        AND resume_id = #{resumeId}
+    </update>
+</mapper>

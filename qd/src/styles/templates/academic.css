@@ -1,0 +1,11 @@
+.tpl-academic { font-family: 'Times New Roman', serif; background: #fffdfa; font-size: 12px; }
+.tpl-academic .preview-header { text-align: center; border-bottom: 2px solid #1e293b; padding-bottom: 16px; margin-bottom: 20px; }
+.tpl-academic .preview-name-block h1 { color: #1e293b; font-size: 22px; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; }
+.tpl-academic .contact-row, .tpl-academic .link-row { justify-content: center; font-size: 11px; color: #475569; }
+.tpl-academic .preview-section h2 { color: #1e293b; border-bottom: 1px solid #cbd5e1; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; font-weight: 600; padding-bottom: 4px; }
+.tpl-academic .preview-item { margin-bottom: 14px; }
+.tpl-academic .item-header strong { font-weight: 700; color: #0f172a; }
+.tpl-academic .item-sub { font-style: italic; color: #64748b; }
+.tpl-academic .date { color: #94a3b8; font-style: italic; }
+.tpl-academic .skill-tag { background: #f1f5f9; color: #334155; border: none; border-radius: 2px; font-family: 'Times New Roman', serif; font-size: 11px; }
+.tpl-academic .achievement, .tpl-academic .tech { font-size: 11px; font-style: italic; }

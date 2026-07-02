@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//maybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.SkillMapper">
+    <insert id="insertSkill" parameterType="com.example.demo.pojo.Skill" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO skills (resume_id, skill_name, proficiency_level, category, sort_order)
+        VALUES (#{resumeId}, #{skillName}, #{proficiencyLevel}, #{category}, #{sortOrder})
+    </insert>
+    <delete id="deleteById">
+        DELETE FROM skills WHERE id = #{id} AND resume_id = #{resumeId}
+    </delete>
+    <delete id="SkillDeleteBatch">
+        DELETE FROM skills
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+        AND resume_id = #{resumeId}
+        AND resume_id IN (
+        SELECT r.id FROM resumes r WHERE r.id = #{resumeId} AND r.user_id = #{userId} AND r.is_deleted = 0
+        )
+    </delete>
+    <update id="updateSkill" parameterType="com.example.demo.pojo.Skill">
+        UPDATE skills
+        <set>
+            <if test="skillName != null">skill_name = #{skillName},</if>
+            <if test="proficiencyLevel != null">proficiency_level = #{proficiencyLevel},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+        </set>
+        WHERE id = #{id} AND resume_id = #{resumeId}
+    </update>
+    <select id="selectById" resultType="com.example.demo.pojo.Skill">
+            SELECT * FROM skills
+        WHERE id = #{id} AND resume_id = #{resumeId}
+    </select>
+    <select id="selectByResumeId" resultType="com.example.demo.pojo.Skill">
+        SELECT * FROM skills
+        WHERE resume_id = #{resumeId}
+        ORDER BY sort_order ASC, created_at DESC
+    </select>
+    <select id="selectIdsByResumeId" resultType="int">
+        SELECT id FROM skills WHERE resume_id = #{resumeId}
+    </select>
+    <select id="selectByResumeIdAndCategory" resultType="com.example.demo.pojo.Skill">
+        SELECT * FROM skills
+        WHERE resume_id = #{resumeId}
+        <if test="category != null and category != ''">
+            AND category = #{category}
+        </if>
+        ORDER BY sort_order ASC, created_at DESC
+    </select>
+    <select id="selectDistinctCategoriesByResumeId" resultType="string">
+        SELECT DISTINCT category
+        FROM skills
+        WHERE resume_id = #{resumeId} AND category IS NOT NULL AND category != ''
+        ORDER BY category ASC
+    </select>
+    <update id="updateSkillSortOrderBatch">
+        UPDATE skills
+        SET sort_order = CASE id
+        <foreach collection="list" item="item">
+            WHEN #{item.id} THEN #{item.sortOrder}
+        </foreach>
+        END
+        WHERE id IN
+        <foreach collection="list" item="item" open="(" separator="," close=")">#{item.id}</foreach>
+        AND resume_id = #{resumeId}
+    </update>
+</mapper>

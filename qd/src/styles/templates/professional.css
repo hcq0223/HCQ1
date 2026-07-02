@@ -1,0 +1,10 @@
+.tpl-professional .preview-header {
+  border-bottom: 3px solid #2563eb;
+  background: linear-gradient(135deg, #eff6ff 0%, #fff 60%);
+  padding: 24px 28px;
+  margin: -24px -28px 20px -28px;
+  border-radius: 8px 8px 0 0;
+}
+.tpl-professional .preview-name-block h1 { color: #1e40af; font-size: 26px; }
+.tpl-professional .preview-section h2 { color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 6px; font-weight: 600; }
+.tpl-professional .skill-tag { background: #dbeafe; color: #1e40af; border: none; }

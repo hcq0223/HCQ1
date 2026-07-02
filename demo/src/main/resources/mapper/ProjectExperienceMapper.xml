@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//maybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.ProjectExperienceMapper">
+    <insert id="insertProject" parameterType="com.example.demo.pojo.ProjectExperience" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO projects (resume_id, project_name, role, project_url, start_date, end_date,
+        description, technologies_used, achievements, sort_order)
+        VALUES (#{resumeId}, #{projectName}, #{role}, #{projectUrl}, #{startDate}, #{endDate},
+        #{description}, #{technologiesUsed}, #{achievements}, #{sortOrder})
+    </insert>
+    <delete id="deleteProject">
+        DELETE FROM projects WHERE id = #{id} AND resume_id = #{resumeId}
+    </delete>
+    <delete id="ProjectDeleteBatch">
+        DELETE FROM projects
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+        AND resume_id = #{resumeId}
+        AND resume_id IN (
+        SELECT r.id FROM resumes r WHERE r.id = #{resumeId} AND r.user_id = #{userId} AND r.is_deleted = 0
+        )
+    </delete>
+    <update id="updateProject" parameterType="com.example.demo.pojo.ProjectExperience">
+        UPDATE projects
+        <set>
+            <if test="projectName != null">project_name = #{projectName},</if>
+            <if test="role != null">role = #{role},</if>
+            <if test="projectUrl != null">project_url = #{projectUrl},</if>
+            <if test="startDate != null">start_date = #{startDate},</if>
+            <if test="endDate != null">end_date = #{endDate},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="technologiesUsed != null">technologies_used = #{technologiesUsed},</if>
+            <if test="achievements != null">achievements = #{achievements},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id} AND resume_id = #{resumeId}
+    </update>
+    <select id="selectByProjectId" resultType="com.example.demo.pojo.ProjectExperience">
+            SELECT * FROM projects WHERE id = #{id} AND resume_id = #{resumeId}
+    </select>
+    <select id="selectByProjectResumeId" resultType="com.example.demo.pojo.ProjectExperience">
+        SELECT * FROM projects
+        WHERE resume_id = #{resumeId}
+        ORDER BY sort_order ASC, start_date DESC
+    </select>
+    <select id="selectIdsByResumeId" resultType="java.lang.Integer">
+        SELECT id FROM projects WHERE resume_id = #{resumeId}
+    </select>
+    <update id="updateProjectSortOrderBatch">
+        UPDATE projects
+        SET sort_order = CASE id
+        <foreach collection="list" item="item">
+            WHEN #{item.id} THEN #{item.sortOrder}
+        </foreach>
+        END,
+        updated_at = NOW()
+        WHERE id IN
+        <foreach collection="list" item="item" open="(" separator="," close=")">#{item.id}</foreach>
+        AND resume_id = #{resumeId}
+    </update>
+</mapper>

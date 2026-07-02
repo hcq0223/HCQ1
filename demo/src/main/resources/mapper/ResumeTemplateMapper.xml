@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//maybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.mapper.ResumeTemplateMapper">
+    <insert id="insertResumeTemplate" parameterType="com.example.demo.pojo.ResumeTemplate" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO resume_templates (name, description, preview_image_url, category, is_premium, is_active)
+        VALUES (#{name}, #{description}, #{previewImageUrl}, #{category}, #{isPremium}, #{isActive})
+    </insert>
+    <delete id="deleteById">
+        DELETE FROM resume_templates WHERE id = #{id}
+    </delete>
+    <update id="updateResumeTemplate" parameterType="com.example.demo.pojo.ResumeTemplate">
+        UPDATE resume_templates
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="previewImageUrl != null">preview_image_url = #{previewImageUrl},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="isPremium != null">is_premium = #{isPremium},</if>
+            <if test="isActive != null">is_active = #{isActive},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+    <update id="updateActiveStatus">
+        UPDATE resume_templates SET is_active = #{isActive} WHERE id = #{id}
+    </update>
+    <select id="selectById" resultType="com.example.demo.pojo.ResumeTemplate">
+        SELECT * FROM resume_templates
+        WHERE id = #{id}
+    </select>
+    <select id="selectList" resultType="com.example.demo.pojo.ResumeTemplate">
+        SELECT id, name, description, preview_image_url, category, is_premium, is_active, created_at
+        FROM resume_templates
+        <where>
+            <if test="category != null and category != ''">
+                AND category = #{category}
+            </if>
+            <if test="isPremium != null">
+                AND is_premium = #{isPremium}
+            </if>
+            <if test="isActive != null">
+                AND is_active = #{isActive}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND name LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+        ORDER BY created_at DESC
+    </select>
+</mapper>

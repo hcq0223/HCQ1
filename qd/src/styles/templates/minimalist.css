@@ -1,0 +1,12 @@
+.tpl-minimalist { background: #fff; padding: 32px 40px; }
+.tpl-minimalist .preview-header { border-bottom: 1px solid #e5e7eb; padding-bottom: 12px; margin-bottom: 16px; }
+.tpl-minimalist .preview-name-block h1 { color: #111827; font-size: 20px; font-weight: 300; letter-spacing: 2px; text-transform: uppercase; }
+.tpl-minimalist .contact-row, .tpl-minimalist .link-row { font-size: 11px; color: #9ca3af; gap: 16px; }
+.tpl-minimalist .preview-section h2 { font-size: 11px; color: #d1d5db; border: none; text-transform: uppercase; letter-spacing: 3px; font-weight: 400; padding-bottom: 0; margin-bottom: 8px; }
+.tpl-minimalist .preview-item { border-bottom: 1px solid #f3f4f6; padding-bottom: 8px; margin-bottom: 8px; }
+.tpl-minimalist .item-header strong { font-weight: 500; color: #374151; }
+.tpl-minimalist .date { font-size: 10px; color: #d1d5db; }
+.tpl-minimalist .item-sub { font-size: 11px; color: #9ca3af; }
+.tpl-minimalist .skill-tags { gap: 4px; }
+.tpl-minimalist .skill-tag { background: #f9fafb; color: #6b7280; border: 1px solid #e5e7eb; border-radius: 2px; padding: 1px 8px; font-size: 11px; }
+.tpl-minimalist .preview-section p { color: #6b7280; font-size: 12px; }
