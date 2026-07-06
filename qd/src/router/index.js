@@ -1,10 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
-  {
-    path: '/',
-    redirect: '/dashboard'
-  },
+ {
+   path: '/',
+    name: 'Home',
+    component: () => import('@/views/HomePageView.vue'),
+    meta: { public: true }
+ },
   {
     path: '/login',
     name: 'Login',

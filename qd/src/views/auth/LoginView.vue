@@ -1,9 +1,10 @@
-<script setup>
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import { login } from '@/api/auth'
-import { useUserStore } from '@/stores/user'
-import { validateUsername, validatePassword, getErrorMessage } from '@/utils'
+ <script setup>
+ import { ref, reactive } from 'vue'
+ import { useRouter } from 'vue-router'
+ import loginBg from '@/images/登录页背景图.png'
+ import { login } from '@/api/auth'
+ import { useUserStore } from '@/stores/user'
+ import { validateUsername, validatePassword, getErrorMessage } from '@/utils'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -40,10 +41,10 @@ async function handleSubmit() {
 }
 </script>
 
-<template>
-  <div class="auth-page">
-    <div class="auth-card">
-      <div class="auth-header">
+ <template>
+ <div class="auth-page" :style="{ backgroundImage: `url(${loginBg})` }">
+  <div class="auth-card">
+     <div class="auth-header">
         <svg width="40" height="40" viewBox="0 0 32 32" fill="none">
           <rect width="32" height="32" rx="6" fill="#2563eb"/>
           <path d="M8 10h16v2H8V10zm0 5h12v2H8v-2zm0 5h14v2H8v-2z" fill="white"/>
@@ -98,19 +99,32 @@ async function handleSubmit() {
 </template>
 
 <style scoped>
-.auth-page {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #f5f6f8 0%, #e8ecf1 100%);
-}
+ .auth-page {
+   min-height: 100vh;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   background-size: cover;
+   background-position: center;
+   background-repeat: no-repeat;
+   position: relative;
+ }
+ .auth-page::before {
+   content: '';
+   position: absolute;
+   inset: 0;
+   background: rgba(0, 0, 0, 0.45);
+   z-index: 0;
+ }
 .auth-card {
   width: 420px;
   background: #fff;
   border-radius: 12px;
   padding: 40px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 1;
+  transform: translateX(450px);
 }
 .auth-header { text-align: center; margin-bottom: 32px; }
 .auth-header h1 { font-size: 22px; margin-top: 12px; }
