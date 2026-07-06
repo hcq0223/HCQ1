@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { selectTrashResume, noIsDeleteResume, deleteResume } from '@/api/resume'
 import EmptyState from '@/components/common/EmptyState.vue'
 import { formatDateTime, getErrorMessage, normalizeResumes } from '@/utils'
@@ -40,7 +40,13 @@ async function handlePermanentDelete(id) {
   }
 }
 
-onMounted(loadTrash)
+onMounted(() => {
+  window.addEventListener('resume-data-changed', loadTrash)
+  loadTrash()
+})
+onUnmounted(() => {
+  window.removeEventListener('resume-data-changed', loadTrash)
+})
 </script>
 
 <template>

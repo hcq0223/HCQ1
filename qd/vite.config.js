@@ -27,11 +27,16 @@ export default defineConfig({
         changeOrigin: true,
         timeout: 60000
       },
-      '/template-images': {
+     '/template-images': {
+       target: 'http://localhost:8080',
+       changeOrigin: true,
+       timeout: 60000
+      },
+      '/images': {
         target: 'http://localhost:8080',
         changeOrigin: true,
         timeout: 60000
-      }
-    }
+     }
+   }
   }
 })

@@ -2,6 +2,8 @@ package com.example.demo.service.impl;
 
 import com.example.demo.mapper.ResumeTemplateMapper;
 import com.example.demo.pojo.ResumeTemplate;
+import com.example.demo.service.Avatar.ImageService;
+import com.example.demo.service.Avatar.TemplateImageService;
 import com.example.demo.service.ResumeTemplateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ResumeTemplateServiceImpl implements ResumeTemplateService {
     private final ResumeTemplateMapper resumeTemplateMapper;
+    private final ImageService imageService;
+
 
     // ==================== 管理端实现 ====================
 
@@ -60,6 +64,12 @@ public class ResumeTemplateServiceImpl implements ResumeTemplateService {
         if (id == null) {
             return false;
         }
+
+        ResumeTemplate resumeTemplate = resumeTemplateMapper.selectById(id);
+        if (resumeTemplate.getPreviewImageUrl() != null){
+            imageService.deleteByUrl(resumeTemplate.getPreviewImageUrl());
+        }
+
         int rows = resumeTemplateMapper.deleteById(id);
         return rows > 0;
     }

@@ -77,4 +77,20 @@
         DELETE FROM resumes
         WHERE id = #{id} AND user_id = #{userId} AND is_deleted = TRUE
     </delete>
+    <delete id="deleteResumes" parameterType="com.example.demo.pojo.Resume">
+        DELETE FROM resumes
+        WHERE user_id = #{userId} AND is_deleted = TRUE
+    </delete>
+    <select id="countRecycledResumes" resultType="com.example.demo.pojo.Resume">
+        SELECT COUNT(*) FROM resume
+        WHERE user_id = #{userId} AND is_deleted = true
+    </select>
+    <select id="selectResumeTitle" resultType="com.example.demo.pojo.Resume">
+            SELECT * FROM resumes
+            WHERE title =  #{title} AND user_id = #{userId} AND is_deleted = FALSE
+    </select>
+    <select id="selectByIdAndUserId" resultType="com.example.demo.pojo.Resume">
+        SELECT * FROM resumes
+        WHERE id = #{id} AND user_id = #{userId} AND is_deleted = false
+    </select>
 </mapper>

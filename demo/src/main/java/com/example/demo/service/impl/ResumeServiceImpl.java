@@ -1,9 +1,10 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.mapper.ResumeMapper;
+import com.example.demo.mapper.*;
 import com.example.demo.pojo.Resume;
 import com.example.demo.service.Avatar.StorageService;
 import com.example.demo.service.ResumeService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -12,14 +13,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ResumeServiceImpl implements ResumeService {
     private final ResumeMapper resumeMapper;
     private final StorageService storageService;
-
-    public ResumeServiceImpl(ResumeMapper resumeMapper, StorageService storageService) {
-        this.resumeMapper = resumeMapper;
-        this.storageService = storageService;
-    }
 
     @Override
     @Transactional
@@ -113,12 +110,17 @@ public class ResumeServiceImpl implements ResumeService {
         if (resume == null || !resume.getIsDeleted()){
             return false;
         }
+        if (resume.getAvatarUrl() != null){
+            storageService.deleteByUrl(resume.getAvatarUrl());
+        }
         Integer deleteResume = resumeMapper.deleteResume(id, userId);
+
         return deleteResume == 1;
     }
 
     @Override
     public List<Resume> selectResumeByUserId(Integer userId) {
+
         return resumeMapper.selectResumeByUserId(userId);
     }
 
@@ -145,5 +147,27 @@ public class ResumeServiceImpl implements ResumeService {
     @Override
     public Resume selectResumeById(Integer id) {
         return resumeMapper.selectResumeById(id);
+    }
+
+    @Override
+    public List<Resume> selectResumeTitle(Integer userId, String title) {
+        return resumeMapper.selectResumeTitle(userId, title);
+    }
+
+    @Override
+    public int countRecycledResumes(Integer userId) {
+        return resumeMapper.countRecycledResumes(userId);
+    }
+
+    @Override
+    public Resume getResumeByIdAndUserId(Integer id, Integer userId) {
+        return resumeMapper.selectByIdAndUserId(id, userId);
+    }
+
+    @Override
+    @Transactional
+    public boolean deleteResumes(Integer userId) {
+        Integer deleteResume = resumeMapper.deleteResumes(userId);
+        return deleteResume > 0;
     }
 }

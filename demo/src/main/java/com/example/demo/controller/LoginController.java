@@ -3,6 +3,8 @@ package com.example.demo.controller;
 import com.example.demo.pojo.User;
 import com.example.demo.service.UserService;
 import jakarta.servlet.http.HttpSession;
+
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
@@ -41,11 +43,16 @@ public class LoginController {
     public ResponseEntity<Map<String, Object>> login(
             @RequestParam @NotBlank(message = "用户名不能为空") String username,
             @RequestParam @NotBlank(message = "密码不能为空") String password,
-            HttpSession session) {
+            HttpServletRequest request) {
         if (userService.UserLogin(username, password)) {
             User user = userService.UserSelectByUsername(username);
             user.setPasswordHash(null);
-            session.setAttribute("user", user);
+            HttpSession oldSession = request.getSession(false);
+            if (oldSession != null) {
+                oldSession.invalidate();
+            }
+            HttpSession newSession = request.getSession(true);
+            newSession.setAttribute("user", user);
             Map<String, Object> r = new HashMap<>(4);
             r.put("success", true);
             r.put("user", user);
@@ -59,13 +66,18 @@ public class LoginController {
     public ResponseEntity<Map<String, Object>> adminLogin(
             @RequestParam @NotBlank(message = "用户名不能为空") String username,
             @RequestParam @NotBlank(message = "密码不能为空") String password,
-            HttpSession session) {
+            HttpServletRequest request) {
         if (userService.adminLogin(username, password)) {
             User user = userService.UserSelectByUsername(username);
             user.setPasswordHash(null);
             if (user.getRole() == null) user.setRole("admin");
-            session.setAttribute("user", user);
-            session.setAttribute("isAdmin", true);
+            HttpSession oldSession = request.getSession(false);
+            if (oldSession != null) {
+                oldSession.invalidate();
+            }
+            HttpSession newSession = request.getSession(true);
+            newSession.setAttribute("user", user);
+            newSession.setAttribute("isAdmin", true);
             Map<String, Object> r = new HashMap<>(4);
             r.put("success", true);
             r.put("user", user);
@@ -90,17 +102,24 @@ public class LoginController {
     @PutMapping("/update")
     public ResponseEntity<Map<String, Object>> update(
             @RequestBody User user,
-            HttpSession session) {
+            HttpServletRequest request) {
+        HttpSession session = request.getSession();
         User user1 = (User) session.getAttribute("user");
         if (user1.getId() == null || user1.getId() <= 0) {
             return unSuccess("用户未登录或会话失效！");
         }
-        User existingUser = userService.UserSelectByUsername(user.getUsername()); if (existingUser != null && !existingUser.getId().equals(user1.getId())) { return unSuccess("账号已存在！"); }
-        User existingEmail = userService.UserSelectByEmail(user.getEmail()); if (existingEmail != null && !existingEmail.getId().equals(user1.getId())) { return unSuccess("邮箱已存在！"); }
+        User existingUser = userService.UserSelectByUsername(user.getUsername());
+        if (existingUser == null && !existingUser.getId().equals(user1.getId())) {
+            return unSuccess("账号不存在！");
+        }
+        User existingEmail = userService.UserSelectByEmail(user.getEmail());
+        if (existingEmail == null && !existingEmail.getId().equals(user1.getId())) {
+            return unSuccess("邮箱不存在！");
+        }
         Boolean b = userService.UserUpdate(user1.getId(),
-                user.getUsername(),
+                user1.getUsername(),
                 user.getPasswordHash(),
-                user.getEmail());
+                user1.getEmail());
         if (!b) return unSuccess("更新失败！");
         if (user.getUsername() != null && !user.getUsername().isBlank()) user1.setUsername(user.getUsername());
         if (user.getEmail() != null && !user.getEmail().isBlank()) user1.setEmail(user.getEmail());
@@ -120,8 +139,12 @@ public class LoginController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Map<String, Object>> logout(HttpSession session) {
+    public ResponseEntity<Map<String, Object>> logout(HttpServletRequest request) {
+        HttpSession session = request.getSession();
         session.invalidate();
         return ResponseEntity.ok(success());
     }
 }
+
+
+

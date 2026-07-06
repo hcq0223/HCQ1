@@ -34,10 +34,12 @@ export function getPublicResume(resumeId) {
   return request.get('/hcq/ResumeShare/public/get', { params: { resumeId } })
 }
 
-export function chatWithMemory(content, conversationId, model) {
+export function chatWithMemory(content, conversationId, model, userId) {
   const params = { content, conversationId }
   if (model) params.model = model
+  if (userId) params.userId = userId
   return request.post('/hcq/chat/chatWithMemory', toFormData(params), {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
   })
 }
+

@@ -16,6 +16,8 @@ public class WebConfig implements WebMvcConfigurer {
         // 映射 /uploads/** 到本地目录
         registry.addResourceHandler("/avatars/**")
                 .addResourceLocations("file:" + uploadPath + "/");
-        registry.addResourceHandler("/template-images/**").addResourceLocations("file:D:/JL/demo/images/JL/");
+       registry.addResourceHandler("/template-images/**").addResourceLocations("file:D:/JL/demo/images/JL/");
+        registry.addResourceHandler("/images/**")
+                .addResourceLocations("file:D:/JL/demo/images/");
     }
 }

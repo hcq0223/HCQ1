@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -20,7 +22,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * ai接口（暂留）
+ * ai接口
  */
 
 
@@ -39,23 +41,27 @@ public class ApiChatController {
     /**
      * 多轮对话接口（带记忆）
      *
-     * @param conversationId 可选，前端生成的会话ID，用于区分不同对话
      */
     @PostMapping("/chatWithMemory")
     public Map<String, Object> chatWithMemory(@RequestParam("content") String content,
                                               @RequestParam(required = false) String model,
                                               @RequestParam(required = false) String conversationId,
-                                              @RequestParam(required = false) MultipartFile[] files,
-                                              HttpSession session) {
+                                              @RequestParam(required = false) Integer userId,
+                                              @RequestParam(required = false) MultipartFile[] files) {
         Map<String, Object> result = new HashMap<>();
         try {
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            HttpSession session = attributes.getRequest().getSession(false);
             User user = (User) session.getAttribute("user");
-            if (user == null) {
+
+            if (user == null && userId == null) {
                 result.put("success", false);
                 result.put("message", "未登录");
                 return result;
             }
-
+            if (userId != null) {
+                user.setId(userId);
+            }
             // 若未传入 conversationId，使用 sessionId 作为默认记忆标识
             if (conversationId == null || conversationId.isEmpty()) {
                 conversationId = session.getId();
@@ -83,10 +89,8 @@ public class ApiChatController {
                     mediaList = null;
                 }
             }
-
-
             // 调用带记忆的服务方法
-            String reply = chatService.chatWithMemory(conversationId, userInfo, model,mediaList);
+            String reply = chatService.chatWithMemory(conversationId, userInfo, model,mediaList, user.getId());
 
             result.put("success", true);
             result.put("result", reply);
@@ -100,7 +104,6 @@ public class ApiChatController {
 
     public String getUserInfo(String content, User user) {
         StringBuilder sb = new StringBuilder();
-        Resume resumeBasicInfo = new Resume();
         //基本信息为空时
         List<Resume> resumes = resumeBasicInfoService.selectResumeByUserId(user.getId());
         if (resumes == null) {
@@ -110,49 +113,40 @@ public class ApiChatController {
         //添加初始消息
         sb.append(content == null ? "" : content.trim()).append("\n");
         sb.append("【系统补充信息】该学生的个人信息情况如下：\n");
-        sb.append("姓名: ").append(resumeBasicInfo.getFullName()).append("\n");
-        sb.append("个人简介/求职意向: ").append(resumeBasicInfo.getProfessionalSummary()).append("\n");
+        sb.append("用户的userId:").append(user.getId()).append("\n");
+        sb.append("姓名: ").append(resumes.get(0).getFullName()).append("\n");
+        for (int hhh = 0; hhh < resumes.size(); hhh++){
 
-        List<WorkExperience> workList = workExperienceService.selectWorkExperienceByResumeId(resumeBasicInfo.getId());
+        sb.append("简历ID: ").append(resumes.get(hhh).getId()).append("\n");
+        sb.append("个人简介/求职意向: ").append(resumes.get(hhh).getProfessionalSummary()).append("\n");
+
+        List<WorkExperience> workList = workExperienceService.selectWorkExperienceByResumeId(resumes.get(hhh).getId());
         if (workList != null && !workList.isEmpty()) {
             sb.append("工作经历:\n");
             for (int i = 0; i < workList.size(); i++) {
                 WorkExperience exp = workList.get(i);
-                sb.append(String.format("  %d. %s | %s | %s - %s\n",
+                sb.append(String.format("  %d. %s \n",
                         i + 1,
-                        exp.getCompanyName(),
-                        exp.getPosition(),
-                        exp.getStartDate(),
-                        exp.getEndDate() != null ? exp.getEndDate() : "至今"));
-                if (exp.getDescription() != null) {
-                    sb.append("     描述: ").append(exp.getDescription()).append("\n");
-                }
-                if (exp.getAchievements() != null) {
-                    sb.append("     成就: ").append(exp.getAchievements()).append("\n");
-                }
+                        exp.getCompanyName()));
+
             }
         }
 
-        List<Education> educationList = educationService.selectEducationByResumeId(resumeBasicInfo.getId());
+        List<Education> educationList = educationService.selectEducationByResumeId(resumes.get(hhh).getId());
         if (educationList != null && !educationList.isEmpty()) {
             sb.append("教育背景:\n");
             for (Education edu : educationList) {
-                sb.append(String.format("  - %s | %s | %s | %s - %s\n",
+                sb.append(String.format("  - %s | %s |\n",
                         edu.getSchoolName(),
                         edu.getMajor(),
-                        edu.getDegree(),
-                        edu.getStartDate(),
-                        edu.getEndDate() != null ? edu.getEndDate() : "至今"));
-                if (edu.getDescription() != null) {
-                    sb.append("     教育描述: ").append(edu.getDescription()).append("\n");
-                }
+                        edu.getDegree()));
                 if (edu.getAchievements() != null) {
                     sb.append("     学术成就: ").append(edu.getAchievements()).append("\n");
                 }
             }
         }
 
-        List<Skill> skills = skillService.getSkillsByResumeId(resumeBasicInfo.getId(), user.getId());
+        List<Skill> skills = skillService.getSkillsByResumeId(resumes.get(hhh).getId(), user.getId());
         if (skills != null && !skills.isEmpty()) {
             sb.append("技能: ");
             sb.append(skills.stream()
@@ -161,13 +155,12 @@ public class ApiChatController {
             sb.append("\n");
         }
 
-        List<ProjectExperience> projectExperienceList = projectExperienceService.getProjectsByResumeId(resumeBasicInfo.getId(), user.getId());
+        List<ProjectExperience> projectExperienceList = projectExperienceService.getProjectsByResumeId(resumes.get(hhh).getId(), user.getId());
         if (projectExperienceList != null && !projectExperienceList.isEmpty()) {
             sb.append("项目经历:\n");
             for (ProjectExperience project : projectExperienceList) {
-                sb.append(String.format("  - %s | %s\n",
-                        project.getProjectName(),
-                        project.getStartDate()));
+                sb.append(String.format("  - %s \n",
+                        project.getProjectName()));
                 if (project.getDescription() != null) {
                     sb.append("     项目描述: ").append(project.getDescription()).append("\n");
                 }
@@ -177,7 +170,7 @@ public class ApiChatController {
             }
         }
 
-        List<Certification> certifications = certificationService.getCertificationsByResumeId(resumeBasicInfo.getId(), user.getId());
+        List<Certification> certifications = certificationService.getCertificationsByResumeId(resumes.get(hhh).getId(), user.getId());
         if (certifications != null && !certifications.isEmpty()) {
             sb.append("证书与奖励: ");
             sb.append(certifications.stream()
@@ -186,13 +179,14 @@ public class ApiChatController {
             sb.append("\n");
         }
 
-        List<Language> languages = languageService.getLanguagesByResumeId(resumeBasicInfo.getId(), user.getId());
+        List<Language> languages = languageService.getLanguagesByResumeId(resumes.get(hhh).getId(), user.getId());
         if (languages != null && !languages.isEmpty()) {
             sb.append("语言能力: ");
             sb.append(languages.stream()
                     .map(l -> l.getLanguageName() + "(" + l.getProficiencyLevel() + ")")
                     .collect(Collectors.joining("、")));
             sb.append("\n");
+        }
         }
         return sb.toString();
     }

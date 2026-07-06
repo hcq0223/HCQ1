@@ -47,6 +47,18 @@ const filteredResumes = computed(() => {
   return list
 })
 
+const templateMap = computed(() => {
+  const map = {}
+  templates.value.forEach(t => { map[t.id] = t })
+  return map
+})
+
+function getTemplateImageUrl(tpl) {
+  if (!tpl?.previewImageUrl) return ""
+  if (tpl.previewImageUrl.startsWith("http")) return tpl.previewImageUrl
+  return "http://localhost:8080" + tpl.previewImageUrl
+}
+
 async function loadTemplates() {
   try {
     const { data } = await getAvailableTemplates()
@@ -166,12 +178,14 @@ function closeMenu() {
 }
 
 onMounted(() => {
+  window.addEventListener('resume-data-changed', loadResumes)
   loadTemplates()
   loadResumes()
   document.addEventListener('click', closeMenu)
 })
 
 onUnmounted(() => {
+  window.removeEventListener('resume-data-changed', loadResumes)
   document.removeEventListener('click', closeMenu)
 })
 </script>
@@ -214,7 +228,11 @@ onUnmounted(() => {
       <div v-else class="resume-grid">
         <div v-for="resume in filteredResumes" :key="resume.id" class="resume-card card" :class="{ 'menu-open': activeMenu === resume.id }">
           <div class="card-thumb">
-            <svg viewBox="0 0 80 100" fill="none">
+            <img v-if="templateMap[resume.templateId]?.previewImageUrl"
+                 :src="getTemplateImageUrl(templateMap[resume.templateId])"
+                 :alt="templateMap[resume.templateId]?.name"
+                 class="thumb-img" />
+            <svg v-else viewBox="0 0 80 100" fill="none">
               <rect width="80" height="100" rx="4" fill="#f3f4f6"/>
               <rect x="12" y="12" width="56" height="6" rx="2" fill="#d1d5db"/>
               <rect x="12" y="24" width="40" height="4" rx="1" fill="#e5e7eb"/>
@@ -224,7 +242,7 @@ onUnmounted(() => {
             </svg>
           </div>
           <div class="card-body">
-            <h3>{{ resume.title }}</h3>
+            <h3>{{ resume.title }} <span class="resume-id">#{{ resume.id }}</span></h3>
             <div class="card-meta">
               <span class="status-tag" :class="{ published: resume.status === 'published' }">
                 <span class="dot"></span>
@@ -358,6 +376,13 @@ onUnmounted(() => {
   border-radius: var(--radius) var(--radius) 0 0;
 }
 
+.card-thumb img {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
 .card-thumb svg {
   height: 100%;
   width: auto;
@@ -365,6 +390,13 @@ onUnmounted(() => {
 
 .card-body {
   padding: 16px;
+}
+
+.resume-id {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 400;
+  margin-left: 6px;
 }
 
 .card-body h3 {
@@ -419,3 +451,6 @@ onUnmounted(() => {
   color: var(--primary);
 }
 </style>
+
+
+

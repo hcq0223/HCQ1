@@ -20,4 +20,8 @@ public interface ResumeService {
     List<Resume> selectTrashResume(Integer userId);
     List<Resume> selectAllResumes();
     Resume selectResumeById(Integer id);
+    List<Resume> selectResumeTitle(Integer userId, String title);
+    int countRecycledResumes(Integer userId);
+    Resume getResumeByIdAndUserId(Integer id, Integer userId);
+    boolean deleteResumes(Integer userId);
 }

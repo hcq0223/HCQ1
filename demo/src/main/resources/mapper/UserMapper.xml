@@ -31,12 +31,9 @@
     <update id="updateUser" parameterType="com.example.demo.pojo.User">
         UPDATE users
         <set>
-            <if test="username != null">username = #{username},</if>
             <if test="passwordHash != null">password_hash = #{passwordHash},</if>
-            <if test="email != null">email = #{email},</if>
-            <if test="role != null">role = #{role},</if>
         </set>
-        WHERE id = #{id}
+        WHERE id = #{id} and username = #{username} and email = #{email}
     </update>
     <update id="forgetUser" parameterType="com.example.demo.pojo.User">
         UPDATE users

@@ -9,4 +9,5 @@ public interface StorageService {
      * @return 文件的访问 URL
      */
     String upload(MultipartFile file);
+    boolean deleteByUrl(String fileUrl);
 }

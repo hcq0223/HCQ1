@@ -14,5 +14,5 @@ public interface ChatService {
      * @param content 用户消息
      * @param model 模型名称（可选）
      */
-    String chatWithMemory(String conversationId, String content, String model, List<Media> medias);
+    String chatWithMemory(String conversationId, String content, String model, List<Media> medias,Integer userId);
 }

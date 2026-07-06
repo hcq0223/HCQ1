@@ -21,4 +21,8 @@ public interface ResumeMapper {
     List<Resume> selectResumeByStatus(Integer userId,String status);
     List<Resume> selectTrashResume(Integer userId);
     List<Resume> selectAllResumes();
+    List<Resume> selectResumeTitle(Integer userId, String title);
+    Resume selectByIdAndUserId(Integer id, Integer userId);
+    int countRecycledResumes(Integer userId);
+    Integer deleteResumes(Integer userId);
 }

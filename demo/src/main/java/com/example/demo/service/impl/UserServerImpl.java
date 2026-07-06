@@ -51,16 +51,12 @@ public class UserServerImpl implements UserService {
         }
         User user = new User();
         user.setId(id);
-        if (username != null && !username.trim().isEmpty()) {
-            user.setUsername(username);
-        }
+        user.setUsername(username);
         if (plainPassword != null && !plainPassword.trim().isEmpty()) {
             String hashedPassword = BCrypt.hashpw(plainPassword, BCrypt.gensalt());
             user.setPasswordHash(hashedPassword);
         }
-        if (email != null && !email.trim().isEmpty()) {
-            user.setEmail(email);
-        }
+        user.setEmail(email);
         if (user.getUsername() == null && user.getPasswordHash() == null && user.getEmail() == null) {
             return true;
         }

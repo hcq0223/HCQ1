@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.2.5</version>
+        <version>3.3.0</version>
         <relativePath/>
     </parent>
     <groupId>com.gym</groupId>
@@ -91,13 +91,6 @@
             <version>${spring-ai-alibaba.version}</version>
         </dependency>
 
-        <!-- Spring AI 基础依赖（可选，starter 已包含） -->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.ai</groupId>-->
-<!--            <artifactId>spring-ai-core</artifactId>-->
-<!--            <version>1.0.0-M6</version>-->
-<!--        </dependency>-->
-
         <!-- 测试 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -116,6 +109,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>3.3.0</version>
                 <configuration>
                     <excludes>
                         <exclude>
