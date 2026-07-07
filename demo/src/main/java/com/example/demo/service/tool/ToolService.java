@@ -412,7 +412,7 @@ public class ToolService {
     public String addSkill(
             @ToolParam(description = "所属简历的ID") Integer resumeId,
             @ToolParam(description = "技能名称，如 Java、Spring Boot、Python") String skillName,
-            @ToolParam(description = "熟练度：beginner(入门)、intermediate(中级)、advanced(高级)、expert(专家)") String proficiencyLevel,
+            @ToolParam(description = "熟练度：beginner(入门)、intermediate(中级)、advanced(高级)、expert(专家)，只能用这四个，且传入时要用英文") String proficiencyLevel,
             @ToolParam(description = "技能分类，如 后端开发、前端开发、数据库等，可选") String category) {
         try {
             ServletRequestAttributes a = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();

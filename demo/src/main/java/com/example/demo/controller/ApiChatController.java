@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.pojo.*;
+import com.example.demo.config.ToolCallTrackingAspect;
 import com.example.demo.service.*;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -90,11 +91,16 @@ public class ApiChatController {
                 }
             }
             // 调用带记忆的服务方法
+            ToolCallTrackingAspect.clearSteps();
             String reply = chatService.chatWithMemory(conversationId, userInfo, model,mediaList, user.getId());
+
+            result.put("result", reply);
+            result.put("toolSteps", ToolCallTrackingAspect.drainSteps());
 
             result.put("success", true);
             result.put("result", reply);
         } catch (Exception e) {
+            ToolCallTrackingAspect.drainSteps();
             result.put("success", false);
             result.put("message", e.getMessage());
         }
@@ -104,91 +110,93 @@ public class ApiChatController {
 
     public String getUserInfo(String content, User user) {
         StringBuilder sb = new StringBuilder();
-        //基本信息为空时
-        List<Resume> resumes = resumeBasicInfoService.selectResumeByUserId(user.getId());
-        if (resumes == null) {
-            return "请先完善个人信息";
-        }
 
+        List<Resume> resumes = resumeBasicInfoService.selectResumeByUserId(user.getId());
         //添加初始消息
         sb.append(content == null ? "" : content.trim()).append("\n");
         sb.append("【系统补充信息】该学生的个人信息情况如下：\n");
         sb.append("用户的userId:").append(user.getId()).append("\n");
-        sb.append("姓名: ").append(resumes.get(0).getFullName()).append("\n");
-        for (int hhh = 0; hhh < resumes.size(); hhh++){
+        //基本信息为空时
+        if (resumes.isEmpty()) {
+            return "用户基本信息为空，柔性劝导用户先去创建一个基础模板，流程：点击创建简历 -> 输入标题和姓名。再用简短的话表明后续我会解决\n";
+        } else {
+            sb.append("基本信息:\n");
+            sb.append("姓名: ").append(resumes.get(0).getFullName()).append("\n");
+            for (int hhh = 0; hhh < resumes.size(); hhh++) {
 
-        sb.append("简历ID: ").append(resumes.get(hhh).getId()).append("\n");
-        sb.append("个人简介/求职意向: ").append(resumes.get(hhh).getProfessionalSummary()).append("\n");
+                sb.append("简历ID: ").append(resumes.get(hhh).getId()).append("\n");
+                sb.append("个人简介/求职意向: ").append(resumes.get(hhh).getProfessionalSummary()).append("\n");
 
-        List<WorkExperience> workList = workExperienceService.selectWorkExperienceByResumeId(resumes.get(hhh).getId());
-        if (workList != null && !workList.isEmpty()) {
-            sb.append("工作经历:\n");
-            for (int i = 0; i < workList.size(); i++) {
-                WorkExperience exp = workList.get(i);
-                sb.append(String.format("  %d. %s \n",
-                        i + 1,
-                        exp.getCompanyName()));
+                List<WorkExperience> workList = workExperienceService.selectWorkExperienceByResumeId(resumes.get(hhh).getId());
+                if (workList != null && !workList.isEmpty()) {
+                    sb.append("工作经历:\n");
+                    for (int i = 0; i < workList.size(); i++) {
+                        WorkExperience exp = workList.get(i);
+                        sb.append(String.format("  %d. %s \n",
+                                i + 1,
+                                exp.getCompanyName()));
 
-            }
-        }
+                    }
+                }
 
-        List<Education> educationList = educationService.selectEducationByResumeId(resumes.get(hhh).getId());
-        if (educationList != null && !educationList.isEmpty()) {
-            sb.append("教育背景:\n");
-            for (Education edu : educationList) {
-                sb.append(String.format("  - %s | %s |\n",
-                        edu.getSchoolName(),
-                        edu.getMajor(),
-                        edu.getDegree()));
-                if (edu.getAchievements() != null) {
-                    sb.append("     学术成就: ").append(edu.getAchievements()).append("\n");
+                List<Education> educationList = educationService.selectEducationByResumeId(resumes.get(hhh).getId());
+                if (educationList != null && !educationList.isEmpty()) {
+                    sb.append("教育背景:\n");
+                    for (Education edu : educationList) {
+                        sb.append(String.format("  - %s | %s |\n",
+                                edu.getSchoolName(),
+                                edu.getMajor(),
+                                edu.getDegree()));
+                        if (edu.getAchievements() != null) {
+                            sb.append("     学术成就: ").append(edu.getAchievements()).append("\n");
+                        }
+                    }
+                }
+
+                List<Skill> skills = skillService.getSkillsByResumeId(resumes.get(hhh).getId(), user.getId());
+                if (skills != null && !skills.isEmpty()) {
+                    sb.append("技能: ");
+                    sb.append(skills.stream()
+                            .map(s -> s.getSkillName() + "(" + s.getProficiencyLevel() + ")")
+                            .collect(Collectors.joining("、")));
+                    sb.append("\n");
+                }
+
+                List<ProjectExperience> projectExperienceList = projectExperienceService.getProjectsByResumeId(resumes.get(hhh).getId(), user.getId());
+                if (projectExperienceList != null && !projectExperienceList.isEmpty()) {
+                    sb.append("项目经历:\n");
+                    for (ProjectExperience project : projectExperienceList) {
+                        sb.append(String.format("  - %s \n",
+                                project.getProjectName()));
+                        if (project.getDescription() != null) {
+                            sb.append("     项目描述: ").append(project.getDescription()).append("\n");
+                        }
+                        if (project.getAchievements() != null) {
+                            sb.append("     '项目成果/亮点: ").append(project.getAchievements()).append("\n");
+                        }
+                    }
+                }
+
+                List<Certification> certifications = certificationService.getCertificationsByResumeId(resumes.get(hhh).getId(), user.getId());
+                if (certifications != null && !certifications.isEmpty()) {
+                    sb.append("证书与奖励: ");
+                    sb.append(certifications.stream()
+                            .map(c -> c.getName() + "(" + c.getIssuingOrganization() + ")")
+                            .collect(Collectors.joining("、")));
+                    sb.append("\n");
+                }
+
+                List<Language> languages = languageService.getLanguagesByResumeId(resumes.get(hhh).getId(), user.getId());
+                if (languages != null && !languages.isEmpty()) {
+                    sb.append("语言能力: ");
+                    sb.append(languages.stream()
+                            .map(l -> l.getLanguageName() + "(" + l.getProficiencyLevel() + ")")
+                            .collect(Collectors.joining("、")));
+                    sb.append("\n");
                 }
             }
+            return sb.toString();
         }
-
-        List<Skill> skills = skillService.getSkillsByResumeId(resumes.get(hhh).getId(), user.getId());
-        if (skills != null && !skills.isEmpty()) {
-            sb.append("技能: ");
-            sb.append(skills.stream()
-                    .map(s -> s.getSkillName() + "(" + s.getProficiencyLevel() + ")")
-                    .collect(Collectors.joining("、")));
-            sb.append("\n");
-        }
-
-        List<ProjectExperience> projectExperienceList = projectExperienceService.getProjectsByResumeId(resumes.get(hhh).getId(), user.getId());
-        if (projectExperienceList != null && !projectExperienceList.isEmpty()) {
-            sb.append("项目经历:\n");
-            for (ProjectExperience project : projectExperienceList) {
-                sb.append(String.format("  - %s \n",
-                        project.getProjectName()));
-                if (project.getDescription() != null) {
-                    sb.append("     项目描述: ").append(project.getDescription()).append("\n");
-                }
-                if (project.getAchievements() != null) {
-                    sb.append("     '项目成果/亮点: ").append(project.getAchievements()).append("\n");
-                }
-            }
-        }
-
-        List<Certification> certifications = certificationService.getCertificationsByResumeId(resumes.get(hhh).getId(), user.getId());
-        if (certifications != null && !certifications.isEmpty()) {
-            sb.append("证书与奖励: ");
-            sb.append(certifications.stream()
-                    .map(c -> c.getName() + "(" + c.getIssuingOrganization() + ")")
-                    .collect(Collectors.joining("、")));
-            sb.append("\n");
-        }
-
-        List<Language> languages = languageService.getLanguagesByResumeId(resumes.get(hhh).getId(), user.getId());
-        if (languages != null && !languages.isEmpty()) {
-            sb.append("语言能力: ");
-            sb.append(languages.stream()
-                    .map(l -> l.getLanguageName() + "(" + l.getProficiencyLevel() + ")")
-                    .collect(Collectors.joining("、")));
-            sb.append("\n");
-        }
-        }
-        return sb.toString();
     }
 }
 

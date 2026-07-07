@@ -49,6 +49,7 @@ public class ChatServiceImpl implements ChatService {
                         + "请先用简短的中文总结出“该学生的核心优势和待提升方向”，"
                         + "然后再结合这些背景信息来回答用户的具体问题。"
                         +"在涉及增删改（除了查询）的业务前，必须等用户回复“确认”后再调用tool"
+                        +"不能给用户返回json格式的回答，只需返回纯文本。"
                         + "建议格式：先给予鼓励，再指出问题，最后提供具体的修改示例。【注意】对于用户的增删改的需求，不需要用‘建议格式’，只需简短询问确认即可")
                 .defaultAdvisors(new SimpleLoggerAdvisor())
                 .defaultTools(toolService)
